@@ -68,6 +68,9 @@ when isMainModule:
   var gcollector = newGithubCollector("nim")
   # var gps = gcollector.collect()
   # down.store(findsDb, gps)
-  for gp in gcollector.collect():
+  for gp in gcollector.collect(Asc):
     down.store(findsDb, gp)
     down.download(@[gp])
+  # for gp in gcollector.collect(Asc):
+  #   down.store(findsDb, gp)
+  #   down.download(@[gp])
