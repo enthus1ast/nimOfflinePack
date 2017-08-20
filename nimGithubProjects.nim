@@ -65,10 +65,14 @@ proc getGithubProjects(jsonNode: JsonNode): GithubProjects =
 
     result.add(gproject)
 
+proc createUrl(lang: string, page: int): string =
+  return "https://api.github.com/search/repositories?q=language:" & lang & "&per_page=100&page=" & $page
+
 proc collect*(gcollector: GithubCollector): GithubProjects =
   var
-    url: string = "https://api.github.com/search/repositories?q=language:" & gcollector.lang & "&per_page=100&page=" & $gcollector.actualPage
+    url: string = createUrl(gcollector.lang, gcollector.actualPage)
     resp: Response = gcollector.client.request(url)
+    gprojects: GithubProjects = newSeq[GithubProject]()
     jsonNode: JsonNode = parseJson(resp.body)
 
   if gcollector.rateLimit == -1:
@@ -82,7 +86,13 @@ proc collect*(gcollector: GithubCollector): GithubProjects =
   if gcollector.maxPage == -1:
     gcollector.maxPage = math.ceil(gcollector.totalCount / GITHUB_REPOS_PER_PAGE).int
 
-  return jsonNode.getGithubProjects()
+  gprojects.add(jsonNode.getGithubProjects())
+
+  # for page in 2..gcollector.maxPage:
+  #   url = createUrl(gcollector.lang, gcollector.actualPage)
+
+
+
 
 when isMainModule:
   var gcollector = newGithubCollector("nim")
