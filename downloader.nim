@@ -50,8 +50,14 @@ proc download(dow: GpDownloader, gps: GithubProjects) =
       discard dow.readyDb.append(%*{"name": gp.computeName(), "insertTime": epochTime()})
       echo "DONE\n"
 
+proc store(dow: GpDownloader, findsDb: FlatDb, project: GithubProject) =
+  # for gp in projects:
+  if not findsDb.exists( equal("name", project.computeName())):
+    discard findsDb.append( %*project  )
+
 when isMainModule:
   var down = newGpDownloader("gp.db", "./repos")
+  var findsDb = newFlatDb("finds.db")
   # var gps = newSeq[GithubProject]()
   # gps.add GithubProject(
   #     githubId : 1234, 
@@ -60,5 +66,8 @@ when isMainModule:
   #     url : "http://github.com/enthus1ast/flatdb.git"
   # )
   var gcollector = newGithubCollector("nim")
-  var gps = gcollector.collect()  
-  down.download(gps)
+  # var gps = gcollector.collect()  
+  # down.store(findsDb, gps)
+  for gp in gcollector.collect():
+    down.store(findsDb, gp)
+    down.download(@[gp])
