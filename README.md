@@ -1,7 +1,10 @@
 # nimOfflinePack
 Hi,
 
-Dankrad and i have bundled a somewhat "little" (ca 3gb uncompressed / xxgb compressed) offline pack for you.
+Dankrad and i have bundled a somewhat "little" (ca 3gb uncompressed / xxgb compressed) 
+"Nim Offline Pack" for you. It consists of about 1500 Git repos. 
+Compressed into one single file.
+
 This comes in handy when you are offline and want to lookup/grep nim code. 
 Or just want to explore the nim ecosystem.
 
@@ -34,7 +37,7 @@ drwxr-xr-x    5 z z  4096 Aug 20 05:19 awk__greencardamom__57229375/
 every folder is still a git repository so you can `cd` into it and `git pull`.
 
 
-we also have build a little tool called `mgit` which let you do the following:
+we also have build (and bundled) a little tool called [mgit](https://github.com/enthus1ast/nimMultiGit) ("multi git") which let you do the following:
 
 ```bash
 # since we store the username this works:
@@ -122,10 +125,8 @@ mgit "*dom96*" log
 
 ```
 
-
 # Download
-[DOWNLOAD (xxgb)](http://code0.xyz/gitCollector/latest.7z)
-
+[DOWNLOAD (about 1500 Nim repos 1.5gb)](http://code0.xyz/gitCollector/latest.7z)
 
 
 | Type        | Hash          
@@ -137,14 +138,8 @@ mgit "*dom96*" log
 # Misc
 
 this repo contains the cralwer and the downloader which helps to construct these packages.
-Please be polite in useing it. (We try to always are because want to construct not destory right?!)
-Since this this is such a noise process we
-recommend that you download our compressed package.
-
-
-
-
-
+Please be polite in useing it. (We try to always are because we want to construct not destory right?!)
+Since this is such a noisy process we recommend that you download our compressed package.
 
 # IDEAS/TODOS
 
