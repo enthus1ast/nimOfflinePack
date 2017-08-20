@@ -38,7 +38,6 @@ we also have build a little tool called `mgit` which let you do the following:
 
 ```bash
 # since we store the username this works:
-
 z@z ~/n/repos> mgit "*Araq*"
 R: nimedit__Araq__80336917
 R: lexim__Araq__33143791
@@ -124,16 +123,27 @@ mgit "*dom96*" log
 ```
 
 
+# Download
+[DOWNLOAD (xxgb)](http://code0.xyz/gitCollector/latest.7z)
+
+
+
+| Type        | Hash          
+| ------------- |:-------------:
+| sha1     | right-aligned 
+| sha256   | centered     |    
+
 
 # Misc
 
 this repo contains the cralwer and the downloader which helps to construct these packages.
 Please be polite in useing it. (We try to always are because want to construct not destory right?!)
-Since this is so a noise process we:
+Since this this is such a noise process we
+recommend that you download our compressed package.
 
-:bangbang:recommend that you download our compressed package.:bangbang:
 
-`>> DOWNLOAD << (xxGB)`
+
+
 
 
 # IDEAS/TODOS
