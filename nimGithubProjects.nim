@@ -30,7 +30,7 @@ type
     maxPage*: int # Actual page
     # maxItems*: int # max items per page = 100 (set by github)
     lang*: string # project language to search for
-  Direction = enum
+  Direction* = enum
     Asc,
     Desc
 
