@@ -3,13 +3,14 @@
 import httpclient
 import json
 import strutils
-import times # TODO: imported for testing, check if realy necessary to import times module
+import times
 import math
 import os # TODO: Remove, used for bad file database
 
 template dbg(args: varargs[untyped]) =
   when not defined release: debugEcho args
 
+const GITHUB_REPOS_START_YEAR: int = 2010
 const GITHUB_REPOS_PER_PAGE: int = 100
 const GITHUB_REPOS_QUERY_LIMIT: int = 1000
 
@@ -29,19 +30,30 @@ type
     actualPage*: int # Actual page
     maxPage*: int # Actual page
     # maxItems*: int # max items per page = 100 (set by github)
+    actualYear*: int
     lang*: string # project language to search for
-  Direction = enum
-    Asc,
-    Desc
 
 proc savePage(page: int) =
   writeFile("page.txt", $page)
+
+proc saveYear(year: int) =
+  writeFile("year.txt", $year)
+
+proc loadYear(): int =
+  if fileExists("year.txt"):
+    return readFile("year.txt").parseInt
+  else:
+    return GITHUB_REPOS_START_YEAR
 
 proc loadPage(): int =
   if fileExists("page.txt"):
     return readFile("page.txt").parseInt
   else:
     return 1
+
+proc url(gcollector: GithubCollector): string =
+  var createdFilter: string = "created:" & $gcollector.actualYear & "-01-01T00:00:00.." & $(gcollector.actualYear) & "-12-31T23:59:59"
+  return "https://api.github.com/search/repositories?q=language:" & gcollector.lang & "+" & createdFilter & "&per_page=100&page=" & $gcollector.actualPage
 
 proc reset*(gcollector: GithubCollector) =
   gcollector.rateLimit = -1
@@ -50,6 +62,7 @@ proc reset*(gcollector: GithubCollector) =
   gcollector.totalCount = -1
   gcollector.actualPage = loadPage()
   gcollector.maxPage = -1
+  gcollector.actualYear = GITHUB_REPOS_START_YEAR
 
 proc newGithubCollector*(lang: string): GithubCollector =
   result = GithubCollector()
@@ -57,7 +70,7 @@ proc newGithubCollector*(lang: string): GithubCollector =
   result.reset()
   result.lang = lang
 
-iterator getGithubProjects(jsonNode: JsonNode): GithubProject =
+iterator getGithubProjects(gcollector: GithubCollector, jsonNode: JsonNode): GithubProject =
   var
     gproject: GithubProject
     ownerNode: JsonNode
@@ -70,55 +83,55 @@ iterator getGithubProjects(jsonNode: JsonNode): GithubProject =
     gproject.user = ownerNode.getOrDefault("login").getStr
     gproject.project = node.getOrDefault("name").getStr
     gproject.url = node.getOrDefault("clone_url").getStr
-    dbg "gproject.githubId: " & $gproject.githubId
-    dbg "gproject.owner: " & gproject.user
-    dbg "gproject.name: " & gproject.project
-    dbg "gproject.url: " & gproject.url
+    dbg "### QUERY (API) URL => " & gcollector.url
+    dbg "=> Project: " & gproject.project
+    dbg "   - Owner: " & gproject.user & "(" & $gproject.githubId & ")"
+    dbg "   - Url: " & gproject.url
+    dbg "###"
 
     yield gproject
 
-proc createUrl(lang: string, page: int, direction: Direction): string =
-  var directionStr: string = ""
-  if direction == Asc:
-    directionStr = "&sort=updated"
-  else:
-    directionStr = ""
-  return "https://api.github.com/search/repositories?q=language:" & lang & "&per_page=100&page=" & $page & directionStr
-
-iterator collect*(gcollector: GithubCollector, direction: Direction): GithubProject =
+iterator collect*(gcollector: GithubCollector): GithubProject =
   var
-    url: string = createUrl(gcollector.lang, gcollector.actualPage, direction)
-    resp: Response = gcollector.client.request(url)
-    jsonNode: JsonNode = parseJson(resp.body)
+    resp: Response
+    jsonNode: JsonNode
+    startPage: int = loadPage()
+    startYear: int = loadYear()
 
-  if gcollector.rateLimit == -1:
-    gcollector.rateLimit = resp.headers["X-RateLimit-Limit"].parseInt
-  if gcollector.rateLimitRemaining == -1:
-    gcollector.rateLimitRemaining = resp.headers["X-RateLimit-Remaining"].parseInt
-  if gcollector.rateLimitReset == -1:
-    gcollector.rateLimitReset = resp.headers["X-RateLimit-Reset"].parseInt
-  if gcollector.totalCount == -1:
-    gcollector.totalCount = jsonNode.getOrDefault("total_count").getNum.int
-  if gcollector.maxPage == -1:
-    gcollector.maxPage = math.ceil(gcollector.totalCount / GITHUB_REPOS_PER_PAGE).int
+  for year in startYear..getTime().toTimeInterval.years:
+    gcollector.actualYear = year
+    saveYear(year)
 
-  for node in jsonNode.getGithubProjects():
-    yield node
-
-  for page in gcollector.actualPage..gcollector.maxPage:
-    url = createUrl(gcollector.lang, page, direction)
-    resp = gcollector.client.request(url)
+    resp = gcollector.client.request(gcollector.url)
     jsonNode = parseJson(resp.body)
 
-    for node in jsonNode.getGithubProjects():
-      yield node
+    gcollector.rateLimitRemaining = resp.headers["X-RateLimit-Remaining"].parseInt
+    gcollector.rateLimitReset = resp.headers["X-RateLimit-Reset"].parseInt
+    gcollector.totalCount = jsonNode.getOrDefault("total_count").getNum.int
+    gcollector.maxPage = math.ceil(gcollector.totalCount / GITHUB_REPOS_PER_PAGE).int
+    gcollector.rateLimit = resp.headers["X-RateLimit-Limit"].parseInt
 
-    savePage(page)
+    # for node in jsonNode.getGithubProjects():
+    #   yield node
 
+    for page in startPage..gcollector.maxPage:
+      gcollector.actualPage = page
+      savePage(page)
+
+      resp = gcollector.client.request(gcollector.url)
+      jsonNode = parseJson(resp.body)
+
+      for node in gcollector.getGithubProjects(jsonNode):
+        yield node
+
+    startPage = 1 # reset to one for the next year
 
 when isMainModule:
   var gcollector = newGithubCollector("nim")
-  for project in gcollector.collect(Asc):
-    echo project.project
-  for project in gcollector.collect(Desc):
-    echo project.project
+  # echo gcollector.url
+  try:
+    for project in gcollector.collect():
+      echo project.project
+  except:
+    echo gcollector.url
+    quit(123)

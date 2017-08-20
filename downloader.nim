@@ -11,7 +11,7 @@ type GpDownloader = object of RootObj
   dbpath: string
   readyDb: FlatDb
 
-proc newGpDownloader(dbpath, repopath: string): GpDownloader = 
+proc newGpDownloader(dbpath, repopath: string): GpDownloader =
   result = GpDownloader()
   result.repopath = repopath
   createDir(repopath)
@@ -24,16 +24,16 @@ proc newGpDownloader(dbpath, repopath: string): GpDownloader =
 proc computeName(gproject: GithubProject): string =
    """$#__$#__$#""" % [gproject.project, gproject.user, $gproject.githubId]
 
-proc getDir(dow: GpDownloader, gproject: GithubProject): string = 
+proc getDir(dow: GpDownloader, gproject: GithubProject): string =
   return dow.repopath / gproject.computeName()
 
-proc genGitCmd(dow: GpDownloader, gproject: GithubProject): string = 
+proc genGitCmd(dow: GpDownloader, gproject: GithubProject): string =
   let gitPath = findExe("git")
   let computedName = gproject.computeName()
   return """$# clone --depth=1 $# $#""" % [gitPath , gproject.url, dow.getDir(gproject)]
 
 proc download(dow: GpDownloader, gps: GithubProjects) =
-  for idx, gp in gps:  
+  for idx, gp in gps:
     echo "[+] Clone [$#/$#]: $#" % [$(idx+1), $gps.len(), gp.project]
     if dirExists(dow.getDir(gp)):
       # folder exists, now check if it was ready before,
@@ -60,13 +60,13 @@ when isMainModule:
   var findsDb = newFlatDb("finds.db")
   # var gps = newSeq[GithubProject]()
   # gps.add GithubProject(
-  #     githubId : 1234, 
+  #     githubId : 1234,
   #     user : "enthus1ast",
-  #     project : "flatdb",  
+  #     project : "flatdb",
   #     url : "http://github.com/enthus1ast/flatdb.git"
   # )
   var gcollector = newGithubCollector("nim")
-  # var gps = gcollector.collect()  
+  # var gps = gcollector.collect()
   # down.store(findsDb, gps)
   for gp in gcollector.collect():
     down.store(findsDb, gp)

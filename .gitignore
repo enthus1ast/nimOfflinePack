@@ -1,3 +1,9 @@
 nimcache/
+repos/
+
 nimGithubProjects
+downloader
+
 page.txt
+year.txt
+crash_*
