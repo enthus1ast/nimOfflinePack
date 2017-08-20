@@ -1,16 +1,15 @@
 # nimOfflinePack
 Hi,
 
-Dankrad and i have bundled a somewhat "little" (ca 3gb uncompressed / xxgb compressed) 
-"Nim Offline Pack" for you. It consists of about 1500 Git repos. 
-Compressed into one single file.
+Dankrad and i have build an index of (almost)
+all public available/visible nim git repositories
+and cloned the latest commits into a flat file structure. 
+It consists of about 1500 Git repos compressed into one single file.
 
-This comes in handy when you are offline and want to lookup/grep nim code. 
-Or just want to explore the nim ecosystem.
+This comes in handy when you are offline and want to lookup or grep through nim code,
+or just want to explore the nim ecosystem.
 
-We have build an index of (almost) all public available/visible nim repositories
-and cloned the latest commit into a flat file structure which looks like so:
-
+The folder structure looks like so:
 ```bash
 [...]
 drwxr-xr-x    3 z z  4096 Aug 20 05:48 asynchttp__tulayang__41775260/
@@ -29,13 +28,9 @@ drwxr-xr-x    5 z z  4096 Aug 20 05:19 awk__greencardamom__57229375/
 [...]
 ```
 
-
 `where $reponame__$owner__$githubid`
 
-
-
-every folder is still a git repository so you can `cd` into it and `git pull`.
-
+every folder is a git repository so you can `cd` into it and `git pull`.
 
 we also have build (and bundled) a little tool called [mgit](https://github.com/enthus1ast/nimMultiGit) ("multi git") which let you do the following:
 
@@ -49,8 +44,6 @@ R: nawabs__Araq__71706837
 R: sphinx__Araq__40964451
 R: wxnim__Araq__38682357
 ```
-
-
 
 ```bash
 z@z ~/n/repos> mgit "*Araq*" log
@@ -126,7 +119,7 @@ mgit "*dom96*" log
 ```
 
 # Download
-[DOWNLOAD (about 1500 Nim repos 1.5gb)](http://code0.xyz/gitCollector/latest.7z)
+[DOWNLOAD (about ~1500 Nim repos ~1.5gb)](http://code0.xyz/gitCollector/latest.7z)
 
 
 | Type        | Hash          
@@ -137,7 +130,7 @@ mgit "*dom96*" log
 
 # Misc
 
-this repo contains the cralwer and the downloader which helps to construct these packages.
+this repo contains the cralwer and the downloader which helped to construct these packages.
 Please be polite in useing it. (We try to always are because we want to construct not destory right?!)
 Since this is such a noisy process we recommend that you download our compressed package.
 
