@@ -30,6 +30,9 @@ type
     maxPage*: int # Actual page
     # maxItems*: int # max items per page = 100 (set by github)
     lang*: string # project language to search for
+  Direction = enum
+    Asc,
+    Desc
 
 proc savePage(page: int) =
   writeFile("page.txt", $page)
@@ -74,12 +77,17 @@ iterator getGithubProjects(jsonNode: JsonNode): GithubProject =
 
     yield gproject
 
-proc createUrl(lang: string, page: int): string =
-  return "https://api.github.com/search/repositories?q=language:" & lang & "&per_page=100&page=" & $page
+proc createUrl(lang: string, page: int, direction: Direction): string =
+  var directionStr: string = ""
+  if direction == Asc:
+    directionStr = "&sort=updated"
+  else:
+    directionStr = ""
+  return "https://api.github.com/search/repositories?q=language:" & lang & "&per_page=100&page=" & $page & directionStr
 
-iterator collect*(gcollector: GithubCollector): GithubProject =
+iterator collect*(gcollector: GithubCollector, direction: Direction): GithubProject =
   var
-    url: string = createUrl(gcollector.lang, gcollector.actualPage)
+    url: string = createUrl(gcollector.lang, gcollector.actualPage, direction)
     resp: Response = gcollector.client.request(url)
     jsonNode: JsonNode = parseJson(resp.body)
 
@@ -98,7 +106,7 @@ iterator collect*(gcollector: GithubCollector): GithubProject =
     yield node
 
   for page in gcollector.actualPage..gcollector.maxPage:
-    url = createUrl(gcollector.lang, page)
+    url = createUrl(gcollector.lang, page, direction)
     resp = gcollector.client.request(url)
     jsonNode = parseJson(resp.body)
 
@@ -110,5 +118,7 @@ iterator collect*(gcollector: GithubCollector): GithubProject =
 
 when isMainModule:
   var gcollector = newGithubCollector("nim")
-  for project in gcollector.collect():
+  for project in gcollector.collect(Asc):
+    echo project.project
+  for project in gcollector.collect(Desc):
     echo project.project
