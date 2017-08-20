@@ -10,12 +10,12 @@ template dbg(args: varargs[untyped]) =
   when not defined release: debugEcho args
 
 type
-  GithubProject = ref object of RootObj
-    id: int # id
-    owner: string # project owner name
-    name: string # project name
-    url: string # clone url
-  GithubProjects = seq[GithubProject]
+  GithubProject* = ref object of RootObj
+    githubId*: int # id
+    owner*: string # project owner name
+    name*: string # project name
+    url*: string # clone url
+  GithubProjects* = seq[GithubProject]
   GithubCollector = ref object of RootObj
     client: HttpClient
     rateLimit: int # Max request until RateLimitReset (timestamp) is passed
