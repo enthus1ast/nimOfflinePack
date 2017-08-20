@@ -5,6 +5,7 @@ import json
 import strutils
 import times # TODO: imported for testing, check if realy necessary to import times module
 import math
+import os # TODO: Remove, used for bad file database
 
 template dbg(args: varargs[untyped]) =
   when not defined release: debugEcho args
@@ -30,12 +31,21 @@ type
     # maxItems*: int # max items per page = 100 (set by github)
     lang*: string # project language to search for
 
+proc savePage(page: int) =
+  writeFile("page.txt", $page)
+
+proc loadPage(): int =
+  if fileExists("page.txt"):
+    return readFile("page.txt").parseInt
+  else:
+    return 1
+
 proc reset*(gcollector: GithubCollector) =
   gcollector.rateLimit = -1
   gcollector.rateLimitRemaining = -1
   gcollector.rateLimitReset = -1
   gcollector.totalCount = -1
-  gcollector.actualPage = 1
+  gcollector.actualPage = loadPage()
   gcollector.maxPage = -1
 
 proc newGithubCollector*(lang: string): GithubCollector =
@@ -44,8 +54,7 @@ proc newGithubCollector*(lang: string): GithubCollector =
   result.reset()
   result.lang = lang
 
-proc getGithubProjects(jsonNode: JsonNode): GithubProjects =
-  result = newSeq[GithubProject]()
+iterator getGithubProjects(jsonNode: JsonNode): GithubProject =
   var
     gproject: GithubProject
     ownerNode: JsonNode
@@ -63,16 +72,15 @@ proc getGithubProjects(jsonNode: JsonNode): GithubProjects =
     dbg "gproject.name: " & gproject.project
     dbg "gproject.url: " & gproject.url
 
-    result.add(gproject)
+    yield gproject
 
 proc createUrl(lang: string, page: int): string =
   return "https://api.github.com/search/repositories?q=language:" & lang & "&per_page=100&page=" & $page
 
-proc collect*(gcollector: GithubCollector): GithubProjects =
+iterator collect*(gcollector: GithubCollector): GithubProject =
   var
     url: string = createUrl(gcollector.lang, gcollector.actualPage)
     resp: Response = gcollector.client.request(url)
-    gprojects: GithubProjects = newSeq[GithubProject]()
     jsonNode: JsonNode = parseJson(resp.body)
 
   if gcollector.rateLimit == -1:
@@ -86,14 +94,23 @@ proc collect*(gcollector: GithubCollector): GithubProjects =
   if gcollector.maxPage == -1:
     gcollector.maxPage = math.ceil(gcollector.totalCount / GITHUB_REPOS_PER_PAGE).int
 
-  gprojects.add(jsonNode.getGithubProjects())
+  for node in jsonNode.getGithubProjects():
+    yield node
 
-  # for page in 2..gcollector.maxPage:
-  #   url = createUrl(gcollector.lang, gcollector.actualPage)
+  for page in gcollector.actualPage..gcollector.maxPage:
+    url = createUrl(gcollector.lang, page)
+    resp = gcollector.client.request(url)
+    jsonNode = parseJson(resp.body)
+
+    for node in jsonNode.getGithubProjects():
+      yield node
+
+    savePage(page)
 
 
 
 
 when isMainModule:
   var gcollector = newGithubCollector("nim")
-  discard gcollector.collect()
+  for project in gcollector.collect():
+    echo project.project
