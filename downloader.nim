@@ -2,11 +2,9 @@ import strutils
 import ospaths
 import os
 import nimGithubProjects
-# import subexe
 import flatdb
 import json
 import times
-
 
 type GpDownloader = object of RootObj
   repopath: string
@@ -22,27 +20,21 @@ proc newGpDownloader(dbpath, repopath: string): GpDownloader =
   result.readyDb = newFlatDb("ready.db")
   if not result.readyDb.load():
     echo "could not load ready.db"
-  # result.db 
-
-# var ready = newFlatDb("ready.db")
 
 proc computeName(gproject: GithubProject): string =
-   """$#__$#__$#""" % [gproject.name, gproject.owner, $gproject.githubId]
+   """$#__$#__$#""" % [gproject.project, gproject.user, $gproject.githubId]
 
 proc getDir(dow: GpDownloader, gproject: GithubProject): string = 
   return dow.repopath / gproject.computeName()
 
-
 proc genGitCmd(dow: GpDownloader, gproject: GithubProject): string = 
   let gitPath = findExe("git")
   let computedName = gproject.computeName()
-  # let basepath = "/foo/baa/collector/repos/"
-  return """$# clone --depth=1 $# $#""" % [gitPath , gproject.url, dow.getDir(gproject)] # basepath / computedName
-
+  return """$# clone --depth=1 $# $#""" % [gitPath , gproject.url, dow.getDir(gproject)]
 
 proc download(dow: GpDownloader, gps: GithubProjects) =
   for idx, gp in gps:  
-    echo "[+] Clone [$#/$#]: $#" % [$(idx+1), $gps.len(), gp.name]
+    echo "[+] Clone [$#/$#]: $#" % [$(idx+1), $gps.len(), gp.project]
     if dirExists(dow.getDir(gp)):
       # folder exists, now check if it was ready before,
       if not dow.readyDb.exists( equal("name", gp.computeName())):
@@ -58,14 +50,24 @@ proc download(dow: GpDownloader, gps: GithubProjects) =
       discard dow.readyDb.append(%*{"name": gp.computeName(), "insertTime": epochTime()})
       echo "DONE\n"
 
-when isMainModule:
+proc store(dow: GpDownloader, findsDb: FlatDb, project: GithubProject) =
+  # for gp in projects:
+  if not findsDb.exists( equal("name", project.computeName())):
+    discard findsDb.append( %*project  )
 
+when isMainModule:
   var down = newGpDownloader("gp.db", "./repos")
-  var gps = newSeq[GithubProject]()
-  gps.add GithubProject(
-      githubId : 1234, 
-      owner : "enthus1ast",
-      name : "flatdb",  
-      url : "http://github.com/enthus1ast/flatdb.git"
-  )
-  down.download(gps)
+  var findsDb = newFlatDb("finds.db")
+  # var gps = newSeq[GithubProject]()
+  # gps.add GithubProject(
+  #     githubId : 1234, 
+  #     user : "enthus1ast",
+  #     project : "flatdb",  
+  #     url : "http://github.com/enthus1ast/flatdb.git"
+  # )
+  var gcollector = newGithubCollector("nim")
+  # var gps = gcollector.collect()  
+  # down.store(findsDb, gps)
+  for gp in gcollector.collect():
+    down.store(findsDb, gp)
+    down.download(@[gp])

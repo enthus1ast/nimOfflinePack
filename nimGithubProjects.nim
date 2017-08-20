@@ -15,7 +15,7 @@ const GITHUB_REPOS_QUERY_LIMIT: int = 1000
 
 type
   GithubProject* = ref object of RootObj
-    id*: int # id
+    githubId*: int # id
     user*: string # project owner name
     project*: string # project name
     url*: string # clone url
@@ -63,11 +63,11 @@ iterator getGithubProjects(jsonNode: JsonNode): GithubProject =
     ownerNode = node.getOrDefault("owner")
 
     gproject = GithubProject()
-    gproject.id = node.getOrDefault("id").getNum.int
+    gproject.githubId = node.getOrDefault("id").getNum.int
     gproject.user = ownerNode.getOrDefault("login").getStr
     gproject.project = node.getOrDefault("name").getStr
     gproject.url = node.getOrDefault("clone_url").getStr
-    dbg "gproject.id: " & $gproject.id
+    dbg "gproject.githubId: " & $gproject.githubId
     dbg "gproject.owner: " & gproject.user
     dbg "gproject.name: " & gproject.project
     dbg "gproject.url: " & gproject.url
@@ -106,8 +106,6 @@ iterator collect*(gcollector: GithubCollector): GithubProject =
       yield node
 
     savePage(page)
-
-
 
 
 when isMainModule:
