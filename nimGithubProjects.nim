@@ -14,7 +14,7 @@ const GITHUB_REPOS_QUERY_LIMIT: int = 1000
 
 type
   GithubProject* = ref object of RootObj
-    id*: int # id
+    githubId*: int # id
     user*: string # project owner name
     project*: string # project name
     url*: string # clone url
@@ -54,11 +54,11 @@ proc getGithubProjects(jsonNode: JsonNode): GithubProjects =
     ownerNode = node.getOrDefault("owner")
 
     gproject = GithubProject()
-    gproject.id = node.getOrDefault("id").getNum.int
+    gproject.githubId = node.getOrDefault("id").getNum.int
     gproject.user = ownerNode.getOrDefault("login").getStr
     gproject.project = node.getOrDefault("name").getStr
     gproject.url = node.getOrDefault("clone_url").getStr
-    dbg "gproject.id: " & $gproject.id
+    dbg "gproject.githubId: " & $gproject.githubId
     dbg "gproject.owner: " & gproject.user
     dbg "gproject.name: " & gproject.project
     dbg "gproject.url: " & gproject.url
@@ -87,7 +87,7 @@ proc collect*(gcollector: GithubCollector): GithubProjects =
     gcollector.maxPage = math.ceil(gcollector.totalCount / GITHUB_REPOS_PER_PAGE).int
 
   gprojects.add(jsonNode.getGithubProjects())
-
+  return gprojects
   # for page in 2..gcollector.maxPage:
   #   url = createUrl(gcollector.lang, gcollector.actualPage)
 
