@@ -47,7 +47,7 @@ proc loadYear(): int =
 
 proc loadPage(): int =
   if fileExists("page.txt"):
-    return readFile("page.txt").parseInt
+    return readFile("page.txt").strip().parseInt
   else:
     return 1
 
