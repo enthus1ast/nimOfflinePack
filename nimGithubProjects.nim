@@ -41,13 +41,13 @@ proc saveYear(year: int) =
 
 proc loadYear(): int =
   if fileExists("year.txt"):
-    return readFile("year.txt").parseInt
+    return parseInt( $readFile("year.txt").strip() )
   else:
     return GITHUB_REPOS_START_YEAR
 
 proc loadPage(): int =
   if fileExists("page.txt"):
-    return readFile("page.txt").strip().parseInt
+    return parseInt( $readFile("page.txt").strip() )
   else:
     return 1
 

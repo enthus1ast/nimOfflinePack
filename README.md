@@ -28,11 +28,10 @@ drwxr-xr-x    5 z z  4096 Aug 20 05:19 awk__greencardamom__57229375/
 [...]
 ```
 
-`where $reponame__$owner__$githubid`
+- `where $reponame__$owner__$githubid`
+- every folder is a git repository so you can `cd` into it and `git pull`.
 
-every folder is a git repository so you can `cd` into it and `git pull`.
-
-we also have build (and bundled) a little tool called [mgit](https://github.com/enthus1ast/nimMultiGit) ("multi git") which let you do the following:
+We also have build (and bundled) a little tool called [mgit](https://github.com/enthus1ast/nimMultiGit) ("multi git") which let you do the following:
 
 ```bash
 # since we store the username this works:
@@ -102,8 +101,12 @@ z@z ~> mgit
         ...
 ```
 
+a copy of `mgit.nim` is part of this package.
+build it with `nim c mgit.nim`, then put it on your path.
+
 
 # Updateing
+## with git
 since these are git repositories and mgit can "bulk execute your git commands"
 this should update all packages:
 
@@ -117,6 +120,9 @@ mgit "*dom96*" pull
 mgit "*dom96*" log
 
 ```
+## or download new package
+we've planned to update this nimOfflinePack once in a while and add new projects.
+If we think there is enough new stuff, we'll build a new index.
 
 # Download
 [DOWNLOAD (about ~1500 Nim repos ~1.5gb)](http://code0.xyz/gitCollector/latest.7z)
@@ -126,6 +132,7 @@ mgit "*dom96*" log
 | ------------- |:-------------:
 | sha1     | right-aligned 
 | sha256   | centered     |    
+
 
 
 # Misc
