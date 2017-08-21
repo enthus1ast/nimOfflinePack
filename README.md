@@ -125,13 +125,13 @@ we've planned to update this nimOfflinePack once in a while and add new projects
 If we think there is enough new stuff, we'll build a new index.
 
 # Download
-[DOWNLOAD (about ~1500 Nim repos ~1.5gb)](http://code0.xyz/gitCollector/latest.7z)
+[DOWNLOAD (about ~1500 Nim repos ~1.5gb)](http://code0.xyz/stuff/repos.7z)
 
 
 | Type        | Hash          
 | ------------- |:-------------:
-| sha1     | right-aligned 
-| sha256   | centered     |    
+| sha1     |a04721f403f347dd7e61255eb40ff710b4b9d07e  repos.7z|
+| sha256   |0b30bb61c80a38af33c32f7676610e8a33ddbd956e0c8287d96c7e63aa0750d6  repos.7z|
 
 
 
