@@ -101,7 +101,7 @@ z@z ~> mgit
         ...
 ```
 
-a copy of `mgit.nim` is part of this package.
+~a copy of `mgit.nim` is part of this package.~
 build it with `nim c mgit.nim`, then put it on your path.
 
 
