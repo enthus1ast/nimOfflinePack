@@ -31,7 +31,7 @@ drwxr-xr-x    5 z z  4096 Aug 20 05:19 awk__greencardamom__57229375/
 - `where $reponame__$owner__$githubid`
 - every folder is a git repository so you can `cd` into it and `git pull`.
 
-We also have build (and bundled) a little tool called [mgit](https://github.com/enthus1ast/nimMultiGit) ("multi git") which let you do the following:
+We also have build (~and bundled~) a little tool called [mgit](https://github.com/enthus1ast/nimMultiGit) ("multi git") which let you do the following:
 
 ```bash
 # since we store the username this works:
